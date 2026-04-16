@@ -187,6 +187,31 @@
         <p class="hint-text mt-2" id="exercise-desc">有自己的训练计划？直接填你知道的消耗值</p>
       </div>
 
+      <!-- 爬坡走专用：速度 + 坡度输入 -->
+      <div id="hillwalk-section" class="hidden space-y-4 mb-4">
+        <div>
+          <label class="text-sm text-slate-500 mb-1 block">速度（km/h）</label>
+          <div class="relative">
+            <input type="number" id="speed" placeholder="5" min="1" max="15" step="0.5" class="pr-12" oninput="calcExercise()" />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">km/h</span>
+          </div>
+          <p class="hint-text mt-1">3.5 = 闲逛的速度 / 5 = 正常走 / 6.5 = 走快了</p>
+        </div>
+        <div>
+          <label class="text-sm text-slate-500 mb-1 block">坡度</label>
+          <div class="flex gap-2 mb-2" id="incline-presets">
+            <button class="radio-btn" onclick="setIncline(5)">5%</button>
+            <button class="radio-btn" onclick="setIncline(7)">7%</button>
+            <button class="radio-btn" onclick="setIncline(9)">9%</button>
+          </div>
+          <div class="relative">
+            <input type="number" id="incline" placeholder="7" min="0" max="20" class="pr-8" oninput="onInclineInput()" />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
+          </div>
+          <p class="hint-text mt-1">5% 微坡 · 7% 明显坡感 · 9% 爬坡感 — 坡度越大消耗越多，9% 约是平地走路的2倍</p>
+        </div>
+      </div>
+
       <!-- MET 模式：时长输入 -->
       <div id="duration-section" class="hidden mb-5">
         <label class="text-sm text-slate-500 mb-1 block">时长</label>
@@ -429,14 +454,14 @@
     // ─── 卡片3：运动热量计算 ───
 
     const EXERCISE_PRESETS = {
-      yoga:     { label: '瑜伽',   met: 2.5,  desc: '拉伸放松为主，出汗不多，适合任何人 · 强度系数 MET 2.5（参考 Compendium of Physical Activities）' },
-      dance:    { label: '广场舞', met: 4.5,  desc: '跟着音乐动，节奏轻松，比散步有劲 · MET 4.5' },
-      aerobics: { label: '健身操', met: 5.5,  desc: '跟视频一起做，微喘、有点小累 · MET 5.5' },
-      swim:     { label: '游泳',   met: 5.8,  desc: '全身发力，比想象中消耗高 · MET 5.8（慢速自由泳）' },
-      bike:     { label: '骑单车', met: 6.8,  desc: '户外/室内皆可，中等配速 · MET 6.8' },
-      hillwalk: { label: '爬坡走', met: 7.0,  desc: '中等坡度步行，比平地多消耗约2倍 · MET 7.0（参考 Compendium of Physical Activities code 17231，约5 km/h 坡度9%）' },
-      jumprope: { label: '跳绳',   met: 10.0, desc: '高强度燃脂，体感很累 · MET 10.0' },
-      custom:   { label: '自定义', met: null,  desc: '有自己的训练计划？直接填你知道的消耗值' }
+      yoga:     { label: '瑜伽',   met: 2.5,        desc: '如果我跟着视频做了一节瑜伽——拉伸为主，出汗不多，睡前也可以' },
+      dance:    { label: '广场舞', met: 4.5,        desc: '如果我出门跳了一段广场舞——跟着音乐动，走走停停，社交感强' },
+      aerobics: { label: '健身操', met: 5.5,        desc: '如果我跟着健身视频跳了一节操——有点累，但挺解压' },
+      swim:     { label: '游泳',   met: 5.8,        desc: '如果我去游泳池游了一会儿——慢慢游不追速度，全身都动到了' },
+      bike:     { label: '骑单车', met: 6.8,        desc: '如果我骑车兜了个风——随意骑，中等速度，不用很拼' },
+      hillwalk: { label: '爬坡走', met: 'hillwalk', desc: '如果我去找个有坡度的地方走一走——自己设定速度和坡度' },
+      jumprope: { label: '跳绳',   met: 10.0,       desc: '如果我拿起跳绳跳了一会儿——持续跳，有点喘，门槛低' },
+      custom:   { label: '自定义', met: null,        desc: '有自己的训练计划？直接填你知道的消耗值' }
     };
 
     // 备用食物参照池（无餐食数据时使用）
@@ -478,6 +503,28 @@
       return `消耗了${best.name}热量的 ${Math.round(ratio * 100)}%`;
     }
 
+    function getMET(speed, incline) {
+      const s = speed || 0;
+      let met;
+      if (s <= 5) met = 2.5 + s * 0.3;
+      else if (s <= 8) met = 4.5 + (s - 5) * 0.8;
+      else met = 7.0 + (s - 8) * 1.0;
+      met += (incline || 0) * 0.4;
+      return Math.max(2, met);
+    }
+
+    function setIncline(val) {
+      document.getElementById('incline').value = val;
+      document.querySelectorAll('#incline-presets .radio-btn').forEach(b => b.classList.remove('selected'));
+      event.target.classList.add('selected');
+      calcExercise();
+    }
+
+    function onInclineInput() {
+      document.querySelectorAll('#incline-presets .radio-btn').forEach(b => b.classList.remove('selected'));
+      calcExercise();
+    }
+
     function setExerciseType(type) {
       const preset = EXERCISE_PRESETS[type];
       state.exerciseMet = preset.met;
@@ -487,12 +534,16 @@
       event.target.classList.add('selected');
       document.getElementById('exercise-desc').textContent = preset.desc;
 
-      const isCustom = (preset.met === null);
+      const isCustom   = (preset.met === null);
+      const isHillwalk = (preset.met === 'hillwalk');
+
+      document.getElementById('hillwalk-section').classList.toggle('hidden', !isHillwalk);
       document.getElementById('duration-section').classList.toggle('hidden', isCustom);
       document.getElementById('custom-kcal-section').classList.toggle('hidden', !isCustom);
 
-      // 切换运动类型时重置时长选中状态
+      // 切换运动类型时重置选中状态
       document.querySelectorAll('#duration-presets .radio-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelectorAll('#incline-presets .radio-btn').forEach(b => b.classList.remove('selected'));
 
       calcExercise();
     }
@@ -510,8 +561,22 @@
           return;
         }
         kcal = Math.round(customKcal);
+      } else if (state.exerciseMet === 'hillwalk') {
+        // 爬坡走：用速度+坡度动态计算 MET
+        const speed    = parseFloat(document.getElementById('speed').value);
+        const incline  = parseFloat(document.getElementById('incline').value) || 0;
+        const duration = parseFloat(document.getElementById('duration').value);
+        if (!speed || !duration) {
+          document.getElementById('exercise-result').classList.add('hidden');
+          state.exerciseKcal = 0;
+          calcTimeline();
+          return;
+        }
+        const w = state.weight || 60;
+        kcal = Math.round(getMET(speed, incline) * w * (duration / 60) * 1.05);
+        state.durationMin = duration;
       } else {
-        // MET 模式：根据时长和体重计算
+        // 固定 MET 模式：根据时长和体重计算
         const duration = parseFloat(document.getElementById('duration').value);
         if (!duration) {
           document.getElementById('exercise-result').classList.add('hidden');
@@ -528,7 +593,7 @@
       document.getElementById('exercise-kcal').textContent = kcal;
       document.getElementById('exercise-result').classList.remove('hidden');
 
-      // 体重说明（仅 MET 模式显示）
+      // 体重说明（MET 模式 + 爬坡走显示，自定义不显示）
       const noteEl = document.getElementById('exercise-weight-note');
       if (state.exerciseMet !== null) {
         noteEl.textContent = state.weight

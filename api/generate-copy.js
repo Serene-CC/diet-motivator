@@ -5,7 +5,7 @@ export default async function handler(req, res) {
 
   const { weightLoss, days, freqPerWeek, exerciseType } = req.body;
 
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return res.status(200).json({ copy: '仅靠随便动动，不需要任何坚持' });
   }
@@ -25,11 +25,11 @@ export default async function handler(req, res) {
 - 可以用具体数字增加说服力
 - 不做道德评判，不施压
 
-只返回一句文案，不要任何说明或解释文字。`;
+只返回一句文案，不要任何说明或解释文字，不要加引号。`;
 
   try {
     const response = await fetch(
-      'https://openrouter.ai/api/v1/chat/completions',
+      'https://api.groq.com/openai/v1/chat/completions',
       {
         method: 'POST',
         headers: {
@@ -37,7 +37,7 @@ export default async function handler(req, res) {
           'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'meta-llama/llama-3.3-70b-instruct:free',
+          model: 'llama-3.3-70b-versatile',
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.9,
           max_tokens: 100
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
       }
     );
 
-    if (!response.ok) throw new Error('OpenRouter API error');
+    if (!response.ok) throw new Error('Groq API error');
 
     const data = await response.json();
     const copy = data.choices?.[0]?.message?.content?.trim() || '仅靠随便动动，不需要任何坚持';

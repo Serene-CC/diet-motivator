@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: '请提供食物描述' });
   }
 
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: '服务器未配置 API Key' });
   }
@@ -28,7 +28,7 @@ ${yummyHint}
 1. 按中国日常饮食习惯和实际份量估算，不要按西方标准
 2. 如果用户没说份量，按常见日常份量估算（比如一碗米饭约250kcal）
 3. 对于外卖、餐厅食物，热量通常比家庭自制偏高
-4. 只返回 JSON，格式如下，不要有任何多余文字：
+4. 只返回 JSON，格式如下，不要有任何多余文字，不要加代码块标记：
 
 {
   "items": [
@@ -39,7 +39,7 @@ ${yummyHint}
 
   try {
     const response = await fetch(
-      'https://openrouter.ai/api/v1/chat/completions',
+      'https://api.groq.com/openai/v1/chat/completions',
       {
         method: 'POST',
         headers: {
@@ -47,7 +47,7 @@ ${yummyHint}
           'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'meta-llama/llama-3.3-70b-instruct:free',
+          model: 'llama-3.3-70b-versatile',
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.3,
           max_tokens: 512
@@ -57,13 +57,12 @@ ${yummyHint}
 
     if (!response.ok) {
       const err = await response.text();
-      throw new Error('OpenRouter API 错误: ' + err);
+      throw new Error('Groq API 错误: ' + err);
     }
 
     const data = await response.json();
     const text = data.choices?.[0]?.message?.content || '';
 
-    // 提取 JSON（防止 Gemini 在前后加说明文字）
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('AI 返回格式异常');
 
