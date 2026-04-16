@@ -19,7 +19,6 @@
     .btn-primary:disabled { background: #a5b4fc; cursor: not-allowed; }
     input[type="number"], input[type="text"], textarea { border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; font-size: 15px; outline: none; transition: border-color 0.2s; width: 100%; background: #fafafa; }
     input[type="number"]:focus, input[type="text"]:focus, textarea:focus { border-color: #6366f1; background: #fff; }
-    input[type="number"]:disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
     .radio-btn { border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 8px 18px; cursor: pointer; font-size: 14px; transition: all 0.15s; background: #fff; }
     .radio-btn.selected { border-color: #6366f1; background: #eef2ff; color: #4f46e5; font-weight: 600; }
     .hint-text { font-size: 12px; color: #94a3b8; line-height: 1.5; }
@@ -92,14 +91,11 @@
 
       <button class="btn-primary w-full" onclick="calcBMI()">算一下</button>
 
-      <!-- BMI结果（初始隐藏） -->
       <div id="bmi-result" class="hidden mt-5 space-y-4">
         <div class="flex items-end gap-2">
           <span class="text-4xl font-bold text-slate-800" id="bmi-value">—</span>
           <span class="text-slate-400 text-sm mb-1">BMI</span>
         </div>
-
-        <!-- 健康参考轴 -->
         <div>
           <div class="bmi-track">
             <div class="bmi-marker" id="bmi-marker" style="left: 0%"></div>
@@ -109,8 +105,7 @@
           </div>
           <p class="hint-text mt-1" id="bmi-hint"></p>
         </div>
-
-        <div class="bg-slate-50 rounded-14 p-4 rounded-xl">
+        <div class="bg-slate-50 p-4 rounded-xl">
           <p class="text-sm text-slate-500">你每天躺着不动，身体也会消耗</p>
           <p class="mt-1"><span class="text-2xl font-bold text-indigo-600" id="bmr-value">—</span> <span class="text-slate-400 text-sm">kcal / 天</span></p>
           <p class="hint-text mt-1">这是你的基础代谢率（BMR），心跳、呼吸、消化都靠它</p>
@@ -147,13 +142,11 @@
 
       <button class="btn-primary w-full" id="analyze-btn" onclick="analyzeFood()">帮我估一下热量</button>
 
-      <!-- 加载状态 -->
       <div id="food-loading" class="hidden text-center py-4">
         <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
         <p class="text-slate-400 text-sm mt-2">AI 正在分析…</p>
       </div>
 
-      <!-- 热量结果 -->
       <div id="food-result" class="hidden mt-5">
         <div id="food-items-list" class="mb-4"></div>
         <div class="border-t border-slate-100 pt-3">
@@ -182,51 +175,40 @@
       <div class="mb-4">
         <label class="text-sm text-slate-500 mb-2 block">选一种运动</label>
         <div class="flex gap-2 flex-wrap" id="exercise-type-btns">
-          <button class="radio-btn" onclick="setExerciseType('walk')">散步</button>
-          <button class="radio-btn" onclick="setExerciseType('briskwalk')">快走</button>
-          <button class="radio-btn" onclick="setExerciseType('jog')">慢跑</button>
-          <button class="radio-btn" onclick="setExerciseType('hillwalk')">爬坡走</button>
+          <button class="radio-btn" onclick="setExerciseType('yoga')">瑜伽</button>
+          <button class="radio-btn" onclick="setExerciseType('dance')">广场舞</button>
+          <button class="radio-btn" onclick="setExerciseType('aerobics')">健身操</button>
+          <button class="radio-btn" onclick="setExerciseType('swim')">游泳</button>
           <button class="radio-btn" onclick="setExerciseType('bike')">骑单车</button>
           <button class="radio-btn" onclick="setExerciseType('jumprope')">跳绳</button>
           <button class="radio-btn selected" onclick="setExerciseType('custom')">自定义</button>
         </div>
+        <p class="hint-text mt-2" id="exercise-desc">有自己的训练计划？直接填你知道的消耗值</p>
       </div>
 
-      <div class="space-y-4 mb-5">
-        <!-- 速度和坡度（仅跑/走/自定义时显示） -->
-        <div id="speed-incline-section" class="space-y-4">
-          <div>
-            <label class="text-sm text-slate-500 mb-1 block">速度（km/h）</label>
-            <div class="relative">
-              <input type="number" id="speed" placeholder="3.5" min="1" max="20" step="0.5" class="pr-12" oninput="calcExercise()" />
-              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">km/h</span>
-            </div>
-            <p class="hint-text mt-1">遛弯 ≈ 4，快走 ≈ 6，慢跑 ≈ 8，很快 ≈ 10+</p>
-          </div>
-          <div>
-            <label class="text-sm text-slate-500 mb-1 block">坡度</label>
-            <div class="relative">
-              <input type="number" id="incline" placeholder="0" min="0" max="20" step="1" class="pr-8" oninput="calcExercise()" />
-              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
-            </div>
-            <p class="hint-text mt-1">平地 = 0，微坡 = 5，爬坡感 = 9，喘不过气 = 12+</p>
-          </div>
+      <!-- MET 模式：时长输入 -->
+      <div id="duration-section" class="hidden mb-5">
+        <label class="text-sm text-slate-500 mb-1 block">时长</label>
+        <div class="flex gap-2 flex-wrap mb-2" id="duration-presets">
+          <button class="radio-btn" onclick="setDuration(20)">20 分钟</button>
+          <button class="radio-btn" onclick="setDuration(45)">45 分钟</button>
+          <button class="radio-btn" onclick="setDuration(60)">1 小时</button>
         </div>
+        <div class="relative">
+          <input type="number" id="duration" placeholder="30" min="1" max="300" class="pr-10" oninput="calcExercise()" />
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">分钟</span>
+        </div>
+        <p class="hint-text mt-1">20分 ≈ 半集综艺，45分 ≈ 1集长剧，60分 ≈ 一个午休</p>
+      </div>
 
-        <!-- 时长 -->
-        <div>
-          <label class="text-sm text-slate-500 mb-1 block">时长</label>
-          <div class="flex gap-2 flex-wrap mb-2" id="duration-presets">
-            <button class="radio-btn" onclick="setDuration(10)">10 分钟</button>
-            <button class="radio-btn" onclick="setDuration(20)">20 分钟</button>
-            <button class="radio-btn" onclick="setDuration(45)">45 分钟</button>
-          </div>
-          <div class="relative">
-            <input type="number" id="duration" placeholder="20" min="1" max="300" class="pr-10" oninput="calcExercise()" />
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">分钟</span>
-          </div>
-          <p class="hint-text mt-1">10分 ≈ 3集短剧片头，20分 ≈ 半集综艺，45分 ≈ 1集长剧</p>
+      <!-- 自定义模式：直接输入消耗 -->
+      <div id="custom-kcal-section" class="mb-5">
+        <label class="text-sm text-slate-500 mb-1 block">每次大约消耗</label>
+        <div class="relative">
+          <input type="number" id="custom-kcal" placeholder="300" min="1" max="3000" class="pr-14" oninput="calcExercise()" />
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">kcal</span>
         </div>
+        <p class="hint-text mt-1">来自手环、运动 App 或自己的估算都可以</p>
       </div>
 
       <!-- 运动结果 -->
@@ -252,17 +234,15 @@
       </div>
 
       <div class="space-y-4 mb-5">
-        <!-- 运动频率 -->
         <div>
           <label class="text-sm text-slate-500 mb-2 block">运动频率</label>
           <div class="flex gap-2 flex-wrap" id="freq-btns">
             <button class="radio-btn" onclick="setFreq(7)">每天</button>
-            <button class="radio-btn selected" onclick="setFreq(3.5)">每两天</button>
-            <button class="radio-btn" onclick="setFreq(3)">每周3次</button>
+            <button class="radio-btn selected" onclick="setFreq(3)">每周3次</button>
+            <button class="radio-btn" onclick="setFreq(1)">每周1次</button>
           </div>
         </div>
 
-        <!-- 时间维度滑轨 -->
         <div>
           <label class="text-sm text-slate-500 mb-2 block">看看多久后的变化</label>
           <div class="flex justify-between items-center mb-2">
@@ -275,12 +255,10 @@
         </div>
       </div>
 
-      <!-- 无数据提示 -->
       <div id="timeline-hint" class="mt-2 text-center p-4 rounded-xl bg-slate-50">
-        <p class="text-slate-400 text-sm">先在卡片3选好运动和时长，预测会自动出现在这里</p>
+        <p class="text-slate-400 text-sm">先在卡片3选好运动，预测会自动出现在这里</p>
       </div>
 
-      <!-- 时间线结果（自动显示，无需按钮） -->
       <div id="timeline-result" class="hidden mt-5">
         <div class="flex gap-3">
           <div class="col-half col-start">
@@ -292,7 +270,6 @@
             <div id="timeline-stay"></div>
           </div>
         </div>
-        <!-- 差距总结 -->
         <div id="timeline-diff" class="mt-4 bg-slate-800 text-white rounded-xl p-4 text-center"></div>
       </div>
     </div>
@@ -309,11 +286,11 @@
       totalCalories: 0,
       foodItems: [],
       exerciseKcal: 0,
-      freqPerWeek: 3.5,
+      exerciseMet: null,
+      exerciseType: '自定义',
+      freqPerWeek: 3,
       periodDays: 30,
-      durationMin: 20,
-      fixedMet: null,
-      exerciseType: '自定义'
+      durationMin: 0
     };
 
     // ─── 工具函数 ───
@@ -384,8 +361,8 @@
 
       document.getElementById('bmi-result').classList.remove('hidden');
 
-      // 如果卡片3已有运动数据，重新计算（体重可能刚刚更新）
-      if (state.exerciseKcal > 0) calcExercise();
+      // 体重更新后重新算卡片3（仅 MET 模式有效，自定义模式不变）
+      if (state.exerciseMet !== null && state.exerciseKcal > 0) calcExercise();
     }
 
     // ─── 卡片2：AI 解析食物热量 ───
@@ -410,7 +387,6 @@
 
         state.foodItems = data.items;
         state.totalCalories = data.items.reduce((s, i) => s + i.kcal, 0);
-
         renderFoodResult();
       } catch (e) {
         alert('热量估算失败，请稍后重试：' + e.message);
@@ -452,97 +428,115 @@
     // ─── 卡片3：运动热量计算 ───
 
     const EXERCISE_PRESETS = {
-      walk:      { label: '散步',   speed: 3.5, incline: 0,  fixedMet: null },
-      briskwalk: { label: '快走',   speed: 6,   incline: 0,  fixedMet: null },
-      jog:       { label: '慢跑',   speed: 8,   incline: 0,  fixedMet: null },
-      hillwalk:  { label: '爬坡走', speed: 5,   incline: 9,  fixedMet: null },
-      bike:      { label: '骑单车', speed: null, incline: null, fixedMet: 6.8 },
-      jumprope:  { label: '跳绳',   speed: null, incline: null, fixedMet: 10.0 },
-      custom:    { label: '自定义', speed: null, incline: null, fixedMet: null }
+      yoga:     { label: '瑜伽',   met: 2.5,  desc: '拉伸放松为主，出汗不多，适合任何人 · 强度系数 MET 2.5（参考 Compendium of Physical Activities）' },
+      dance:    { label: '广场舞', met: 4.5,  desc: '跟着音乐动，节奏轻松，比散步有劲 · MET 4.5' },
+      aerobics: { label: '健身操', met: 5.5,  desc: '跟视频一起做，微喘、有点小累 · MET 5.5' },
+      swim:     { label: '游泳',   met: 5.8,  desc: '全身发力，比想象中消耗高 · MET 5.8（慢速自由泳）' },
+      bike:     { label: '骑单车', met: 6.8,  desc: '户外/室内皆可，中等配速 · MET 6.8' },
+      jumprope: { label: '跳绳',   met: 10.0, desc: '高强度燃脂，体感很累 · MET 10.0' },
+      custom:   { label: '自定义', met: null,  desc: '有自己的训练计划？直接填你知道的消耗值' }
     };
+
+    // 备用食物参照池（无餐食数据时使用）
+    const FOOD_POOL = [
+      { name: '一个鸡蛋',     kcal: 70 },
+      { name: '一根香蕉',     kcal: 90 },
+      { name: '半碗米饭',     kcal: 110 },
+      { name: '一杯豆浆',     kcal: 130 },
+      { name: '一碗白米饭',   kcal: 220 },
+      { name: '一杯全糖奶茶', kcal: 350 },
+      { name: '一个煎饼果子', kcal: 450 },
+      { name: '一碗兰州拉面', kcal: 550 }
+    ];
+
+    function getFunText(kcal) {
+      if (state.foodItems.length > 0) {
+        // 随机取用户当天吃的一项做对比
+        const item = state.foodItems[Math.floor(Math.random() * state.foodItems.length)];
+        const pct = Math.round((kcal / item.kcal) * 100);
+        if (pct >= 95 && pct <= 115) return `刚好把「${item.name}」的热量还回去了`;
+        if (pct > 115) return `不止消耗了「${item.name}」，还多燃了 ${kcal - item.kcal} kcal`;
+        if (pct >= 50) return `消耗了你今天那份「${item.name}」热量的 ${pct}%`;
+        return `把「${item.name}」热量的 ${pct}% 还给了身体，小积累`;
+      }
+
+      // 找比例最接近 1:1 的食物
+      let best = FOOD_POOL[0];
+      let bestScore = Infinity;
+      for (const food of FOOD_POOL) {
+        const ratio = kcal / food.kcal;
+        if (ratio >= 0.3 && ratio <= 4.0) {
+          const score = Math.abs(ratio - 1.0);
+          if (score < bestScore) { bestScore = score; best = food; }
+        }
+      }
+      const ratio = kcal / best.kcal;
+      if (ratio >= 0.9 && ratio <= 1.15) return `刚好消耗掉${best.name}的热量`;
+      if (ratio > 1.15) return `消耗了 ${ratio.toFixed(1)} 个${best.name}的热量！`;
+      return `消耗了${best.name}热量的 ${Math.round(ratio * 100)}%`;
+    }
 
     function setExerciseType(type) {
       const preset = EXERCISE_PRESETS[type];
-      state.fixedMet = preset.fixedMet;
+      state.exerciseMet = preset.met;
       state.exerciseType = preset.label;
 
       document.querySelectorAll('#exercise-type-btns .radio-btn').forEach(b => b.classList.remove('selected'));
       event.target.classList.add('selected');
+      document.getElementById('exercise-desc').textContent = preset.desc;
 
-      const siSection = document.getElementById('speed-incline-section');
+      const isCustom = (preset.met === null);
+      document.getElementById('duration-section').classList.toggle('hidden', isCustom);
+      document.getElementById('custom-kcal-section').classList.toggle('hidden', !isCustom);
 
-      if (preset.fixedMet !== null) {
-        siSection.classList.add('hidden');
-      } else {
-        siSection.classList.remove('hidden');
-        if (preset.speed !== null) {
-          document.getElementById('speed').value = preset.speed;
-          document.getElementById('incline').value = preset.incline;
-        }
-      }
+      // 切换运动类型时重置时长选中状态
+      document.querySelectorAll('#duration-presets .radio-btn').forEach(b => b.classList.remove('selected'));
 
       calcExercise();
     }
 
-    function getMET(speed, incline) {
-      if (state.fixedMet) return state.fixedMet;
-      const baseSpeed = speed || 0;
-      let met;
-      if (baseSpeed <= 5) met = 2.5 + baseSpeed * 0.3;
-      else if (baseSpeed <= 8) met = 4.5 + (baseSpeed - 5) * 0.8;
-      else met = 7.0 + (baseSpeed - 8) * 1.0;
-      met += (incline || 0) * 0.4;
-      return Math.max(2, met);
-    }
-
     function calcExercise() {
-      const duration = parseFloat(document.getElementById('duration').value);
+      let kcal;
 
-      let met, valid;
-      if (state.fixedMet) {
-        met = state.fixedMet;
-        valid = !!duration;
+      if (state.exerciseMet === null) {
+        // 自定义：直接读取用户填写的消耗值
+        const customKcal = parseFloat(document.getElementById('custom-kcal').value);
+        if (!customKcal || customKcal <= 0) {
+          document.getElementById('exercise-result').classList.add('hidden');
+          state.exerciseKcal = 0;
+          calcTimeline();
+          return;
+        }
+        kcal = Math.round(customKcal);
       } else {
-        const speed = parseFloat(document.getElementById('speed').value);
-        const incline = parseFloat(document.getElementById('incline').value) || 0;
-        met = getMET(speed, incline);
-        valid = !!(speed && duration);
+        // MET 模式：根据时长和体重计算
+        const duration = parseFloat(document.getElementById('duration').value);
+        if (!duration) {
+          document.getElementById('exercise-result').classList.add('hidden');
+          state.exerciseKcal = 0;
+          calcTimeline();
+          return;
+        }
+        const w = state.weight || 60;
+        kcal = Math.round(state.exerciseMet * w * (duration / 60) * 1.05);
+        state.durationMin = duration;
       }
 
-      if (!valid) {
-        document.getElementById('exercise-result').classList.add('hidden');
-        state.exerciseKcal = 0;
-        calcTimeline();
-        return;
-      }
-
-      const w = state.weight || 60;
-      const kcal = Math.round(met * w * (duration / 60) * 1.05);
       state.exerciseKcal = kcal;
-      state.durationMin = duration;
-
       document.getElementById('exercise-kcal').textContent = kcal;
       document.getElementById('exercise-result').classList.remove('hidden');
 
-      // 体重说明
+      // 体重说明（仅 MET 模式显示）
       const noteEl = document.getElementById('exercise-weight-note');
-      noteEl.textContent = state.weight
-        ? `基于你的体重 ${state.weight} kg 计算`
-        : '建议先填卡片1，结果会更准确（当前用 60 kg 估算）';
-
-      // 有趣换算
-      const funEl = document.getElementById('exercise-fun');
-      let funText = '';
-      if (state.foodItems.length > 0) {
-        const yummiest = state.foodItems.reduce((a, b) => b.kcal > a.kcal ? b : a);
-        const pct = Math.round((kcal / yummiest.kcal) * 100);
-        funText = `消耗了你今天那份「${yummiest.name}」热量的 ${pct}%`;
+      if (state.exerciseMet !== null) {
+        noteEl.textContent = state.weight
+          ? `基于你的体重 ${state.weight} kg 计算`
+          : '建议先填卡片1，结果会更准确（当前用 60 kg 估算）';
       } else {
-        const kfc = Math.round(kcal / 294 * 10) / 10;
-        if (kfc >= 0.8) funText = `够多吃 ${kfc.toFixed(1)} 块吮指原味鸡！！`;
-        else funText = `相当于消耗了 ${Math.round(kcal / 57)} 颗糖的热量`;
+        noteEl.textContent = '';
       }
-      funEl.textContent = '🎉 ' + funText;
+
+      document.getElementById('exercise-fun').textContent = '🎉 ' + getFunText(kcal);
 
       // 自动更新卡片4
       calcTimeline();
@@ -572,8 +566,8 @@
       // 左栏：如果动了
       const timelines = [];
       timelines.push({ day: '今晚', text: 'EPOC 后燃效应：运动后 12~24 小时持续消耗' });
-      if (state.periodDays >= 3) timelines.push({ day: '第3天', text: '睡眠深度开始改善' });
-      if (state.periodDays >= 7) timelines.push({ day: '第7天', text: '爬楼梯不再气喘' });
+      if (state.periodDays >= 3)  timelines.push({ day: '第3天',  text: '睡眠深度开始改善' });
+      if (state.periodDays >= 7)  timelines.push({ day: '第7天',  text: '爬楼梯不再气喘' });
       if (state.periodDays >= 14) timelines.push({ day: '第14天', text: '皮肤状态悄悄变好' });
       if (state.periodDays >= 30) timelines.push({ day: '第30天', text: `体重减少约 ${weightLoss.toFixed(1)} kg，每走一步膝盖少承受约 ${kneeRelief.toFixed(1)} kg 冲击` });
       if (state.periodDays >= 90) timelines.push({ day: '第90天', text: '心肺效率提升，走长路不再先喊累' });
@@ -585,7 +579,6 @@
         </div>
       `).join('');
 
-      // 右栏：如果没动
       document.getElementById('timeline-stay').innerHTML = `
         <div class="timeline-row">
           <div class="timeline-dot orange"></div>
@@ -593,7 +586,6 @@
         </div>
       `;
 
-      // 差距总结
       const days = state.periodDays;
       const periodLabel = days < 14 ? `${days}天` : days < 60 ? `${Math.round(days / 7)}周` : `${Math.round(days / 30)}个月`;
 
@@ -607,7 +599,6 @@
 
       resultEl.classList.remove('hidden');
 
-      // 防抖：用户停止操作 800ms 后才请求 AI 文案
       clearTimeout(copyDebounce);
       copyDebounce = setTimeout(fetchAICopy, 800);
     }
