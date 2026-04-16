@@ -5,7 +5,7 @@ export default async function handler(req, res) {
 
   const { weightLoss, days, freqPerWeek, exerciseType } = req.body;
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     return res.status(200).json({ copy: '仅靠随便动动，不需要任何坚持' });
   }
@@ -29,21 +29,26 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
+      'https://openrouter.ai/api/v1/chat/completions',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.9, maxOutputTokens: 100 }
+          model: 'google/gemini-2.0-flash-exp:free',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.9,
+          max_tokens: 100
         })
       }
     );
 
-    if (!response.ok) throw new Error('Gemini API error');
+    if (!response.ok) throw new Error('OpenRouter API error');
 
     const data = await response.json();
-    const copy = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '仅靠随便动动，不需要任何坚持';
+    const copy = data.choices?.[0]?.message?.content?.trim() || '仅靠随便动动，不需要任何坚持';
 
     res.status(200).json({ copy });
   } catch {

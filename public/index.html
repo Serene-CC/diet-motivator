@@ -180,6 +180,7 @@
           <button class="radio-btn" onclick="setExerciseType('aerobics')">健身操</button>
           <button class="radio-btn" onclick="setExerciseType('swim')">游泳</button>
           <button class="radio-btn" onclick="setExerciseType('bike')">骑单车</button>
+          <button class="radio-btn" onclick="setExerciseType('hillwalk')">爬坡走</button>
           <button class="radio-btn" onclick="setExerciseType('jumprope')">跳绳</button>
           <button class="radio-btn selected" onclick="setExerciseType('custom')">自定义</button>
         </div>
@@ -433,6 +434,7 @@
       aerobics: { label: '健身操', met: 5.5,  desc: '跟视频一起做，微喘、有点小累 · MET 5.5' },
       swim:     { label: '游泳',   met: 5.8,  desc: '全身发力，比想象中消耗高 · MET 5.8（慢速自由泳）' },
       bike:     { label: '骑单车', met: 6.8,  desc: '户外/室内皆可，中等配速 · MET 6.8' },
+      hillwalk: { label: '爬坡走', met: 7.0,  desc: '中等坡度步行，比平地多消耗约2倍 · MET 7.0（参考 Compendium of Physical Activities code 17231，约5 km/h 坡度9%）' },
       jumprope: { label: '跳绳',   met: 10.0, desc: '高强度燃脂，体感很累 · MET 10.0' },
       custom:   { label: '自定义', met: null,  desc: '有自己的训练计划？直接填你知道的消耗值' }
     };

@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: '请提供食物描述' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: '服务器未配置 API Key' });
   }
@@ -39,24 +39,29 @@ ${yummyHint}
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
+      'https://openrouter.ai/api/v1/chat/completions',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.3, maxOutputTokens: 512 }
+          model: 'google/gemini-2.0-flash-exp:free',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+          max_tokens: 512
         })
       }
     );
 
     if (!response.ok) {
       const err = await response.text();
-      throw new Error('Gemini API 错误: ' + err);
+      throw new Error('OpenRouter API 错误: ' + err);
     }
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = data.choices?.[0]?.message?.content || '';
 
     // 提取 JSON（防止 Gemini 在前后加说明文字）
     const jsonMatch = text.match(/\{[\s\S]*\}/);
